@@ -1,13 +1,11 @@
 use axum::{
-    extract::{Json, Path, Query},
-    response::{Html, IntoResponse},
     routing::get,
     Router,
 };
 mod database;
-// use std::sync::Arc;
+mod handlers;
+use handlers::*;
 use tokio::main;
-// struct AppState {}
 
 #[main]
 async fn main() {
@@ -16,8 +14,4 @@ async fn main() {
         .serve(router.into_make_service())
         .await
         .unwrap();
-}
-
-async fn root_handler() -> impl IntoResponse {
-    Html(include_str!("../../blackrose-website-frontend/index.html"))
 }
