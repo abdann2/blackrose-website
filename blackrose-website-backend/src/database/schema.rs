@@ -3,35 +3,35 @@
 diesel::table! {
     blog_posts (id) {
         id -> Int4,
-        title -> Nullable<Text>,
-        content -> Nullable<Text>,
-        author_id -> Nullable<Int4>,
-        created_at -> Nullable<Timestamp>,
-        updated_at -> Nullable<Timestamp>,
-        removed -> Nullable<Bool>,
+        title -> Text,
+        content -> Text,
+        author_id -> Int4,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+        removed -> Bool,
     }
 }
 
 diesel::table! {
     comments (id) {
         id -> Int4,
-        content -> Nullable<Text>,
-        author_id -> Nullable<Int4>,
-        post_id -> Nullable<Int4>,
-        created_at -> Nullable<Timestamp>,
-        updated_at -> Nullable<Timestamp>,
-        removed -> Nullable<Bool>,
+        content -> Text,
+        author_id -> Int4,
+        post_id -> Int4,
+        created_at -> Timestamp,
+        updated_at -> Timestamp,
+        removed -> Bool,
     }
 }
 
 diesel::table! {
     users (id) {
         id -> Int4,
-        username -> Nullable<Text>,
-        display_name -> Nullable<Text>,
-        email -> Nullable<Text>,
-        password_hash -> Nullable<Text>,
-        admin -> Nullable<Bool>,
+        username -> Text,
+        display_name -> Text,
+        email -> Text,
+        password_hash -> Text,
+        admin -> Bool,
     }
 }
 
