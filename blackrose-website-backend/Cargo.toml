@@ -9,4 +9,5 @@ edition = "2021"
 axum = "0.6.15"
 diesel = { version = "2.0.3", features = ["postgres", "uuid"] }
 diesel-async = { version = "0.2.2", features = ["postgres"] }
+jsonwebtoken = "8.3.0"
 tokio = { version = "1.27.0", features = ["tokio-macros", "macros", "rt-multi-thread"] }
