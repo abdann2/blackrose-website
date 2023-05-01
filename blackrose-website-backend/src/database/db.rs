@@ -4,6 +4,7 @@ use diesel_async::AsyncPgConnection;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
+#[derive(Clone)]
 pub struct DbInterface {
     // Put it in an async arc mutex for thread safety
     pub db: Arc<Mutex<AsyncPgConnection>>,
