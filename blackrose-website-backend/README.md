@@ -14,6 +14,7 @@ See *Zero to Production, chapter 7* for reference on high level concepts and bes
         3. Access the `Email` shared state and send the message.
         4. Return success response
     4. Make a handler for 'registration/confirm' which expands a query for the `token`. If the token is found successfully in the `registration_tokens` table, return a success response and update the user's `email_confirmed` as True. Delete the entry in `registration_tokens` when done.
+    5. Modify `login_handler` to not allow logins for users who have not confirmed their emails
 2. Input Validation for these REST endpoints using the `validator` crate
 See [this axum example](https://github.com/tokio-rs/axum/blob/main/examples/validator/src/main.rs) for direction.
     1. Define `FromRequest` implementation on `UserCredentials` and `UserRegistrationCredentials`. This would use the `DbInterface` state to do the checking of the things done in `registration_handler` and `login_handler`. In addition, the `Validate` trait would be derived on the aforementioned structs.
