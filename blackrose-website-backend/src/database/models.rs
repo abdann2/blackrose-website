@@ -1,4 +1,4 @@
-use crate::database::schema::{blog_posts, comments, users};
+use crate::database::schema::{blog_posts, comments, registration_tokens, users};
 use diesel::data_types::PgTimestamp;
 use diesel::prelude::*;
 use serde::Deserialize;
@@ -41,6 +41,7 @@ pub struct User {
     pub email: String,
     pub password_hash: String,
     pub admin: bool,
+    pub registration_confirmed: bool,
 }
 
 #[derive(Insertable)]
@@ -51,6 +52,15 @@ pub struct NewUser {
     pub email: String,
     pub password_hash: String,
     pub admin: bool,
+    pub registration_confirmed: bool,
+}
+
+#[derive(Queryable, Identifiable, Insertable, Associations)]
+#[diesel(primary_key(user_id))]
+#[diesel(belongs_to(User))]
+pub struct RegistrationToken {
+    pub user_id: i32,
+    pub registration_token: String,
 }
 
 #[derive(Deserialize)]
