@@ -3,9 +3,12 @@ use diesel::data_types::PgTimestamp;
 use diesel::prelude::*;
 use serde::Deserialize;
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Identifiable, Associations)]
+#[diesel(belongs_to(User, foreign_key = author_id))]
 #[diesel(table_name = blog_posts)]
+#[diesel(primary_key(blog_post_id))]
 pub struct BlogPost {
+    #[diesel(column_name = blog_post_id)]
     pub id: i32,
     pub title: String,
     pub content: String,
@@ -15,7 +18,8 @@ pub struct BlogPost {
     pub removed: bool,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Associations)]
+#[diesel(belongs_to(User, foreign_key = author_id))]
 #[diesel(table_name = blog_posts)]
 pub struct NewBlogPost {
     pub title: String,
@@ -26,9 +30,11 @@ pub struct NewBlogPost {
     pub removed: bool,
 }
 
-#[derive(Queryable, AsChangeset, Clone)]
+#[derive(Queryable, AsChangeset, Clone, Identifiable)]
 #[diesel(table_name = users)]
+#[diesel(primary_key(user_id))]
 pub struct User {
+    #[diesel(column_name = user_id)]
     pub id: i32,
     pub username: String,
     pub display_name: String,
@@ -61,24 +67,30 @@ pub struct UserRegistrationCredentials {
     pub password: String,
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Identifiable, Associations)]
+#[diesel(belongs_to(User, foreign_key = author_id))]
+#[diesel(belongs_to(BlogPost, foreign_key = post_id))]
+#[diesel(primary_key(comment_id))]
 #[diesel(table_name = comments)]
 struct Comment {
+    #[diesel(column_name = comment_id)]
     id: i32,
     content: String,
     author_id: i32,
     post_id: i32,
     created_at: PgTimestamp,
-    updated_at: PgTimestamp,
+    updated_at: Option<PgTimestamp>,
     removed: bool,
 }
 
-#[derive(Insertable)]
+#[derive(Insertable, Associations)]
+#[diesel(belongs_to(User, foreign_key = author_id))]
+#[diesel(belongs_to(BlogPost, foreign_key = post_id))]
 #[diesel(table_name = comments)]
 struct NewComment {
     content: String,
     author_id: i32,
     post_id: i32,
     created_at: PgTimestamp,
-    updated_at: PgTimestamp,
+    updated_at: Option<PgTimestamp>,
 }

@@ -1,8 +1,8 @@
 // @generated automatically by Diesel CLI.
 
 diesel::table! {
-    blog_posts (id) {
-        id -> Int4,
+    blog_posts (blog_post_id) {
+        blog_post_id -> Int4,
         title -> Text,
         content -> Text,
         author_id -> Int4,
@@ -13,20 +13,20 @@ diesel::table! {
 }
 
 diesel::table! {
-    comments (id) {
-        id -> Int4,
+    comments (comment_id) {
+        comment_id -> Int4,
         content -> Text,
         author_id -> Int4,
         post_id -> Int4,
         created_at -> Timestamp,
-        updated_at -> Timestamp,
+        updated_at -> Nullable<Timestamp>,
         removed -> Bool,
     }
 }
 
 diesel::table! {
-    users (id) {
-        id -> Int4,
+    users (user_id) {
+        user_id -> Int4,
         username -> Text,
         display_name -> Text,
         email -> Text,
