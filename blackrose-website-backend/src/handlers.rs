@@ -1,9 +1,7 @@
-use std::fmt::Display;
-
 use crate::{
     auth::{expire_in_five_hours, Claims},
     database::models::{User, UserCredentials, UserRegistrationCredentials},
-    database::{db::DbInterface, models::NewUser},
+    database::{db::AppState, models::NewUser},
     errors::{LoginError, RegistrationError},
     KEYS,
 };
@@ -23,7 +21,7 @@ pub async fn root_handler() -> Response {
 }
 
 pub async fn login_handler(
-    State(db_int): State<DbInterface>,
+    State(app_state): State<AppState>,
     Json(credentials): Json<UserCredentials>,
 ) -> Result<Json<Value>, LoginError> {
     // Checks if credentials are present
@@ -32,7 +30,7 @@ pub async fn login_handler(
     }
     // Find the user associated with the email in the database
     use crate::database::schema::users::dsl::*;
-    let mut conn = db_int.db.lock().await;
+    let mut conn = app_state.db.lock().await;
     let found_user: User = users
         .filter(email.eq(credentials.email.clone()))
         .first::<User>(&mut *conn)
@@ -66,7 +64,7 @@ pub async fn login_handler(
 }
 
 pub async fn registration_handler(
-    State(db_int): State<DbInterface>,
+    State(app_state): State<AppState>,
     Json(credentials): Json<UserRegistrationCredentials>,
 ) -> Result<Json<Value>, RegistrationError> {
     // Check for missing credentials
@@ -89,7 +87,7 @@ pub async fn registration_handler(
         admin: false,
     };
     use crate::database::schema::users::dsl::*;
-    let mut conn = db_int.db.lock().await;
+    let mut conn = app_state.db.lock().await;
     new_user
         .insert_into(users)
         .execute(&mut *conn)

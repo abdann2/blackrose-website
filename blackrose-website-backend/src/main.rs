@@ -6,7 +6,7 @@ mod auth;
 mod database;
 mod errors;
 mod handlers;
-use crate::database::db::DbInterface;
+use crate::database::db::AppState;
 use dotenvy::dotenv;
 use handlers::*;
 use once_cell::sync::Lazy;
@@ -25,7 +25,7 @@ async fn main() {
     dotenv().expect("No .env file found");
     let db_url = var("DATABASE_URL").expect("Unable to load DATABASE_URL");
     // Establish the database interface
-    let db_int = DbInterface::new(&db_url)
+    let db_int = AppState::new(&db_url)
         .await
         .expect("Unable to establish connection");
 
