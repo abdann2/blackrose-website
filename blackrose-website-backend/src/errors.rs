@@ -1,6 +1,8 @@
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::Json;
+use diesel::ConnectionError as DieselConnectionError;
+use lettre::transport::smtp::Error as EmailRelayError;
 use serde_json::json;
 use thiserror::Error;
 
@@ -65,4 +67,11 @@ impl IntoResponse for RegistrationError {
         };
         (status, Json(json!({ "error": err_msg }))).into_response()
     }
+}
+#[derive(Debug, Error)]
+pub enum AppStateInitializationError {
+    #[error(transparent)]
+    DatabaseConnectionError(#[from] DieselConnectionError),
+    #[error(transparent)]
+    EmailCreationError(#[from] EmailRelayError),
 }

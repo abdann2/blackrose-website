@@ -1,8 +1,9 @@
 use crate::{
     auth::{expire_in_five_hours, Claims},
+    database::models::NewUser,
     database::models::{User, UserCredentials, UserRegistrationCredentials},
-    database::{db::AppState, models::NewUser},
     errors::{LoginError, RegistrationError},
+    state::AppState,
     KEYS,
 };
 use axum::{
@@ -85,6 +86,7 @@ pub async fn registration_handler(
         display_name: credentials.display_name,
         password_hash: hashed_password,
         admin: false,
+        registration_confirmed: false,
     };
     use crate::database::schema::users::dsl::*;
     let mut conn = app_state.db.lock().await;

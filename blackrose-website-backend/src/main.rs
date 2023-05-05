@@ -6,7 +6,8 @@ mod auth;
 mod database;
 mod errors;
 mod handlers;
-use crate::database::db::AppState;
+mod state;
+use crate::state::AppState;
 use dotenvy::dotenv;
 use handlers::*;
 use once_cell::sync::Lazy;
@@ -24,8 +25,11 @@ async fn main() {
     // Load .env file
     dotenv().expect("No .env file found");
     let db_url = var("DATABASE_URL").expect("Unable to load DATABASE_URL");
+    let email_relay = var("EMAIL_RELAY").expect("Unable to load EMAIL_RELAY");
+    let email = var("EMAIL").expect("Unable to load EMAIL");
+    let email_password = var("EMAIL_PASSWORD").expect("Unable to load EMAIL_PASSWORD");
     // Establish the database interface
-    let db_int = AppState::new(&db_url)
+    let db_int = AppState::new(&db_url, &email_relay, &email, &email_password)
         .await
         .expect("Unable to establish connection");
 
