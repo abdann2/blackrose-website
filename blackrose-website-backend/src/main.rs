@@ -7,6 +7,7 @@ mod database;
 mod errors;
 mod handlers;
 mod state;
+mod utils;
 use crate::state::AppState;
 use dotenvy::dotenv;
 use handlers::*;

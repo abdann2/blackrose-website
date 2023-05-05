@@ -1,9 +1,10 @@
 use crate::{
     auth::{expire_in_five_hours, Claims},
     database::models::NewUser,
-    database::models::{User, UserCredentials, UserRegistrationCredentials},
+    database::models::{RegistrationToken, User, UserCredentials, UserRegistrationCredentials},
     errors::{LoginError, RegistrationError},
     state::AppState,
+    utils::generate_registration_token,
     KEYS,
 };
 use axum::{
@@ -90,9 +91,9 @@ pub async fn registration_handler(
     };
     use crate::database::schema::users::dsl::*;
     let mut conn = app_state.db.lock().await;
-    new_user
+    let inserted_user: User = new_user
         .insert_into(users)
-        .execute(&mut *conn)
+        .get_result::<User>(&mut *conn)
         .await
         .map_err(|err| match err {
             DieselError::DatabaseError(DatabaseErrorKind::UniqueViolation, _info) => {
@@ -100,6 +101,17 @@ pub async fn registration_handler(
             }
             _ => RegistrationError::InternalError,
         })?;
+    // Make the registration token and store in the database. If an error occurs, send an internal error response
+    let new_registration_token = RegistrationToken {
+        user_id: inserted_user.id,
+        registration_token: generate_registration_token(),
+    };
+    use crate::database::schema::registration_tokens::dsl::*;
+    new_registration_token
+        .insert_into(registration_tokens)
+        .execute(&mut *conn)
+        .await
+        .map_err(|_| RegistrationError::InternalError)?;
     // Drop the connection
     drop(conn);
     // return a success message. TODO: consider making a struct for this.
