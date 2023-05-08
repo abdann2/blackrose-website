@@ -2,9 +2,11 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::Json;
 use diesel::ConnectionError as DieselConnectionError;
-use lettre::transport::smtp::Error as EmailRelayError;
+use lettre::transport::smtp::Error as SmtpError;
 use serde_json::json;
 use thiserror::Error;
+
+use crate::email::RegistrationConfirmation;
 
 #[derive(Error, Debug)]
 pub enum LoginError {
@@ -18,6 +20,8 @@ pub enum LoginError {
     InvalidToken,
     #[error("Failed to create token")]
     TokenCreation,
+    #[error("User registration is unconfirmed.")]
+    UnconfirmedUserRegistration,
 }
 
 impl IntoResponse for LoginError {
@@ -34,6 +38,9 @@ impl IntoResponse for LoginError {
             ),
             Self::InvalidToken => (StatusCode::BAD_REQUEST, "Invalid token."),
             Self::TokenCreation => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to create token."),
+            Self::UnconfirmedUserRegistration => {
+                (StatusCode::CONFLICT, "User registration is unconfirmed.")
+            }
         };
         (status, Json(json!({ "error": err_msg }))).into_response()
     }
@@ -68,10 +75,41 @@ impl IntoResponse for RegistrationError {
         (status, Json(json!({ "error": err_msg }))).into_response()
     }
 }
+
+#[derive(Error, Debug)]
+pub enum RegistrationConfirmationError {
+    #[error("Invalid token")]
+    InvalidToken,
+    #[error("Internal error")]
+    InternalError,
+}
+
+impl IntoResponse for RegistrationConfirmationError {
+    fn into_response(self) -> axum::response::Response {
+        let (status, err_msg) = match self {
+            Self::InvalidToken => (StatusCode::BAD_REQUEST, "Invalid token."),
+            Self::InternalError => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "An internal server error occured.",
+            ),
+        };
+        (status, RegistrationConfirmation::failure()).into_response()
+    }
+}
 #[derive(Debug, Error)]
 pub enum AppStateInitializationError {
     #[error(transparent)]
     DatabaseConnectionError(#[from] DieselConnectionError),
     #[error(transparent)]
-    EmailCreationError(#[from] EmailRelayError),
+    EmailCreationError(#[from] SmtpError),
+}
+
+#[derive(Error, Debug)]
+pub enum SendEmailError {
+    #[error("The provided receiving email `{0}` could not be parsed.")]
+    BadReceivingEmail(String),
+    #[error("Error rendering html")]
+    HtmlRenderingError,
+    #[error("Smtp error")]
+    SmtpError(#[from] SmtpError),
 }

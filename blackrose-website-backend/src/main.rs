@@ -1,13 +1,16 @@
+#![feature(async_closure)]
 use axum::{
     routing::{get, post},
     Router,
 };
 mod auth;
 mod database;
+mod email;
 mod errors;
 mod handlers;
 mod state;
 mod utils;
+use crate::email::{EMAIL, EMAIL_PASSWORD, EMAIL_RELAY};
 use crate::state::AppState;
 use dotenvy::dotenv;
 use handlers::*;
@@ -21,16 +24,20 @@ static KEYS: Lazy<auth::Keys> = Lazy::new(|| {
     auth::Keys::new(secret.as_bytes())
 });
 
+static DB_URL: Lazy<String> = Lazy::new(|| {
+    dotenv().expect("No .env file found");
+    var("DATABASE_URL").expect("Missing DATABASE_URL env variable.")
+});
+
+static BASE_URL: Lazy<String> = Lazy::new(|| {
+    dotenv().expect("No .env file found");
+    var("BASE_URL").expect("Missing BASE_URL env variable.")
+});
+
 #[main]
 async fn main() {
-    // Load .env file
-    dotenv().expect("No .env file found");
-    let db_url = var("DATABASE_URL").expect("Unable to load DATABASE_URL");
-    let email_relay = var("EMAIL_RELAY").expect("Unable to load EMAIL_RELAY");
-    let email = var("EMAIL").expect("Unable to load EMAIL");
-    let email_password = var("EMAIL_PASSWORD").expect("Unable to load EMAIL_PASSWORD");
     // Establish the database interface
-    let db_int = AppState::new(&db_url, &email_relay, &email, &email_password)
+    let mut db_int = AppState::new(&DB_URL, &EMAIL_RELAY, &EMAIL, &EMAIL_PASSWORD)
         .await
         .expect("Unable to establish connection");
 
@@ -38,6 +45,7 @@ async fn main() {
         .route("/", get(root_handler))
         .route("/login", post(login_handler))
         .route("/register", post(registration_handler))
+        .route("/register/confirm", get(registration_confirmation_handler))
         .with_state(db_int);
     axum::Server::bind(&"127.0.0.1:4000".parse().unwrap())
         .serve(router.into_make_service())

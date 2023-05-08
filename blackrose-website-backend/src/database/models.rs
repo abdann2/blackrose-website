@@ -30,7 +30,7 @@ pub struct NewBlogPost {
     pub removed: bool,
 }
 
-#[derive(Queryable, AsChangeset, Clone, Identifiable)]
+#[derive(Queryable, AsChangeset, Clone, Identifiable, Selectable)]
 #[diesel(table_name = users)]
 #[diesel(primary_key(user_id))]
 pub struct User {
@@ -55,7 +55,7 @@ pub struct NewUser {
     pub registration_confirmed: bool,
 }
 
-#[derive(Queryable, Identifiable, Insertable, Associations)]
+#[derive(Queryable, Identifiable, Insertable, Associations, Selectable)]
 #[diesel(primary_key(user_id))]
 #[diesel(belongs_to(User))]
 pub struct RegistrationToken {
@@ -77,6 +77,10 @@ pub struct UserRegistrationCredentials {
     pub password: String,
 }
 
+#[derive(Deserialize)]
+pub struct RegistrationQueryExtractor {
+    pub registration_token: String,
+}
 #[derive(Queryable, Identifiable, Associations)]
 #[diesel(belongs_to(User, foreign_key = author_id))]
 #[diesel(belongs_to(BlogPost, foreign_key = post_id))]

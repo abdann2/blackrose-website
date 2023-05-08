@@ -1,8 +1,7 @@
+use crate::email::EmailClient;
 use crate::errors::AppStateInitializationError;
 use diesel_async::AsyncConnection;
 use diesel_async::AsyncPgConnection;
-use lettre::transport::smtp::authentication::Credentials;
-use lettre::SmtpTransport;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -10,7 +9,7 @@ use tokio::sync::Mutex;
 pub struct AppState {
     // Put it in an async arc mutex for thread safety
     pub db: Arc<Mutex<AsyncPgConnection>>,
-    pub email: SmtpTransport,
+    pub email: EmailClient,
 }
 
 impl AppState {
@@ -20,11 +19,11 @@ impl AppState {
         email: &str,
         password: &str,
     ) -> Result<Self, AppStateInitializationError> {
+        // Establish database connection
         let conn = AsyncPgConnection::establish(database_url).await?;
-        let credentials = Credentials::new(email.to_owned(), password.to_owned());
-        let email = SmtpTransport::relay(email_relay)?
-            .credentials(credentials)
-            .build();
+        // Establish email client
+        let email = EmailClient::new(email_relay, email, password)?;
+        // Wrap connection in threadsafe mutex
         let conn = Arc::new(Mutex::new(conn));
         Ok(Self { db: conn, email })
     }
