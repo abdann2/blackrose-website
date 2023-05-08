@@ -1,0 +1,29 @@
+body { 
+font-family: Arial, Helvetica, sans-serif;
+background-color: rgb(56, 56, 56);
+margin: 0 auto;
+width: auto;
+padding: 0 0em 1em;
+}
+header {
+  background-image: linear-gradient(gray, rgb(94, 94, 94), rgb(56, 56, 56));
+  text-align: center;
+}
+#blackroselogo {
+  max-width:700px;
+  margin: -40px 20px -40px 20px;
+  width: 100%;
+}
+main {
+  background-color: rgb(56, 56, 56);
+  width: 600px;
+  padding: 0 2em 1em;
+  margin: auto;
+  color: white;
+  text-align: center;
+}
+a {
+  background-color: aliceblue;
+  border: solid rgb(126, 126, 126) 3px;
+  padding: 3px 10px 3px 10px;
+}
