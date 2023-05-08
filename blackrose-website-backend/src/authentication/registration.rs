@@ -1,8 +1,8 @@
 use crate::{
-    authentication::validation::{RegistrationQueryExtractor, UserRegistrationCredentials},
+    authentication::errors::{RegistrationConfirmationError, RegistrationError},
+    authentication::validation::{RegistrationTokenQueryExtractor, UserRegistrationCredentials},
     database::models::{NewUser, RegistrationToken, User},
     email::RegistrationConfirmation,
-    errors::{RegistrationConfirmationError, RegistrationError},
     state::AppState,
     utils::generate_registration_token,
     BASE_URL,
@@ -96,7 +96,7 @@ pub async fn registration_handler(
 
 pub async fn registration_confirmation_handler<'a>(
     State(app_state): State<AppState>,
-    query: Query<RegistrationQueryExtractor>,
+    query: Query<RegistrationTokenQueryExtractor>,
 ) -> Result<Html<String>, RegistrationConfirmationError> {
     // First join users and registration_tokens together, updating the rows where we find our registration token. Then, we delete the registration_token from the registration_tokens table. Do this in a single transaction to be ACID compliant
     use crate::database::schema::registration_tokens::dsl::*;
