@@ -1,6 +1,9 @@
 use crate::{
-    authentication::auth::{expire_in_five_hours, Claims},
-    database::models::{User, UserCredentials},
+    authentication::{
+        auth::{expire_in_five_hours, Claims},
+        validation::UserCredentials,
+    },
+    database::models::User,
     errors::LoginError,
     state::AppState,
     KEYS,

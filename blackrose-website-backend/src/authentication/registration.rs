@@ -1,7 +1,6 @@
 use crate::{
-    database::models::{
-        NewUser, RegistrationQueryExtractor, RegistrationToken, User, UserRegistrationCredentials,
-    },
+    authentication::validation::{RegistrationQueryExtractor, UserRegistrationCredentials},
+    database::models::{NewUser, RegistrationToken, User},
     email::RegistrationConfirmation,
     errors::{RegistrationConfirmationError, RegistrationError},
     state::AppState,
