@@ -1,24 +1,21 @@
 use crate::{
-    authentication::auth::{expire_in_five_hours, Claims},
     database::models::{
-        NewUser, RegistrationQueryExtractor, RegistrationToken, User, UserCredentials,
-        UserRegistrationCredentials,
+        NewUser, RegistrationQueryExtractor, RegistrationToken, User, UserRegistrationCredentials,
     },
     email::RegistrationConfirmation,
-    errors::{LoginError, RegistrationConfirmationError, RegistrationError},
+    errors::{RegistrationConfirmationError, RegistrationError},
     state::AppState,
     utils::generate_registration_token,
-    BASE_URL, KEYS,
+    BASE_URL,
 };
 use axum::{
     extract::{Query, State},
-    response::{Html, IntoResponse, Json, Response},
+    response::{Html, Json},
 };
-use bcrypt::{hash, verify, DEFAULT_COST};
+use bcrypt::{hash, DEFAULT_COST};
 use diesel::result::Error as DieselError;
 use diesel::{prelude::*, result::DatabaseErrorKind};
 use diesel_async::{AsyncConnection, RunQueryDsl};
-use jsonwebtoken::{encode, Header};
 use scoped_futures::ScopedFutureExt;
 use serde_json::{json, Value};
 
