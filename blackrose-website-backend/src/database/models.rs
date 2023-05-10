@@ -1,4 +1,5 @@
 use crate::database::schema::{blog_posts, comments, registration_tokens, users};
+use chrono::{DateTime, Utc};
 use diesel::data_types::PgTimestamp;
 use diesel::prelude::*;
 use serde::Deserialize;
@@ -13,8 +14,8 @@ pub struct BlogPost {
     pub title: String,
     pub content: String,
     pub author_id: i32,
-    pub created_at: PgTimestamp,
-    pub updated_at: PgTimestamp,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
     pub removed: bool,
 }
 
@@ -25,8 +26,8 @@ pub struct NewBlogPost {
     pub title: String,
     pub content: String,
     pub author_id: i32,
-    pub created_at: PgTimestamp,
-    pub updated_at: PgTimestamp,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
     pub removed: bool,
 }
 
@@ -74,10 +75,12 @@ struct Comment {
     content: String,
     author_id: i32,
     post_id: i32,
-    created_at: PgTimestamp,
-    updated_at: Option<PgTimestamp>,
+    created_at: DateTime<Utc>,
+    updated_at: Option<DateTime<Utc>>,
     removed: bool,
 }
+
+// Don't have removed field because you shouldn't be able to remove a comment as soon as you add it
 
 #[derive(Insertable, Associations)]
 #[diesel(belongs_to(User, foreign_key = author_id))]
@@ -87,6 +90,6 @@ struct NewComment {
     content: String,
     author_id: i32,
     post_id: i32,
-    created_at: PgTimestamp,
-    updated_at: Option<PgTimestamp>,
+    created_at: DateTime<Utc>,
+    updated_at: Option<DateTime<Utc>>,
 }

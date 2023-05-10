@@ -6,8 +6,8 @@ diesel::table! {
         title -> Text,
         content -> Text,
         author_id -> Int4,
-        created_at -> Timestamp,
-        updated_at -> Timestamp,
+        created_at -> Timestamptz,
+        updated_at -> Nullable<Timestamptz>,
         removed -> Bool,
     }
 }
@@ -18,8 +18,8 @@ diesel::table! {
         content -> Text,
         author_id -> Int4,
         post_id -> Int4,
-        created_at -> Timestamp,
-        updated_at -> Nullable<Timestamp>,
+        created_at -> Timestamptz,
+        updated_at -> Nullable<Timestamptz>,
         removed -> Bool,
     }
 }

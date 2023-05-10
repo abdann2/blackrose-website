@@ -12,8 +12,8 @@ CREATE TABLE blog_posts (
     title text NOT NULL,
     content text NOT NULL,
     author_id int NOT NULL,
-    created_at timestamp NOT NULL,
-    updated_at timestamp NOT NULL,
+    created_at timestamptz NOT NULL,
+    updated_at timestamptz,
     removed bool NOT NULL,
     FOREIGN KEY (author_id) REFERENCES users (user_id)
 );
@@ -22,8 +22,8 @@ CREATE TABLE comments (
     content text NOT NULL,
     author_id int NOT NULL,
     post_id int NOT NULL,
-    created_at timestamp NOT NULL,
-    updated_at timestamp,
+    created_at timestamptz NOT NULL,
+    updated_at timestamptz,
     removed bool NOT NULL,
     FOREIGN KEY (author_id) REFERENCES users (user_id),
     FOREIGN KEY (post_id) REFERENCES blog_posts (blog_post_id)
