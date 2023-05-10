@@ -1,4 +1,4 @@
-use crate::{errors::LoginError, KEYS};
+use crate::{authentication::errors::LoginError, KEYS};
 use axum::{
     async_trait,
     extract::FromRequestParts,

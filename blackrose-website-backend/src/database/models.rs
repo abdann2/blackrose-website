@@ -63,24 +63,6 @@ pub struct RegistrationToken {
     pub registration_token: String,
 }
 
-#[derive(Deserialize)]
-pub struct UserCredentials {
-    pub email: String,
-    pub password: String,
-}
-
-#[derive(Deserialize)]
-pub struct UserRegistrationCredentials {
-    pub username: String,
-    pub display_name: String,
-    pub email: String,
-    pub password: String,
-}
-
-#[derive(Deserialize)]
-pub struct RegistrationQueryExtractor {
-    pub registration_token: String,
-}
 #[derive(Queryable, Identifiable, Associations)]
 #[diesel(belongs_to(User, foreign_key = author_id))]
 #[diesel(belongs_to(BlogPost, foreign_key = post_id))]

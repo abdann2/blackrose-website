@@ -3,25 +3,29 @@ use axum::{
     routing::{get, post},
     Router,
 };
-mod auth;
+mod authentication;
 mod database;
 mod email;
 mod errors;
-mod handlers;
+mod home;
 mod state;
 mod utils;
-use crate::email::{EMAIL, EMAIL_PASSWORD, EMAIL_RELAY};
-use crate::state::AppState;
+use authentication::{
+    login::login_handler,
+    registration::{registration_confirmation_handler, registration_handler},
+};
 use dotenvy::dotenv;
-use handlers::*;
+use email::{EMAIL, EMAIL_PASSWORD, EMAIL_RELAY};
+use home::root_handler;
 use once_cell::sync::Lazy;
+use state::AppState;
 use std::env::var;
 use tokio::main;
 
-static KEYS: Lazy<auth::Keys> = Lazy::new(|| {
+static KEYS: Lazy<authentication::auth::Keys> = Lazy::new(|| {
     dotenv().expect("No .env file found");
     let secret = var("SECRET").expect("Missing SECRET env variable.");
-    auth::Keys::new(secret.as_bytes())
+    authentication::auth::Keys::new(secret.as_bytes())
 });
 
 static DB_URL: Lazy<String> = Lazy::new(|| {

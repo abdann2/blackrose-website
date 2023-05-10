@@ -1,81 +1,26 @@
 use crate::{
-    auth::{expire_in_five_hours, Claims},
-    database::models::{
-        NewUser, RegistrationQueryExtractor, RegistrationToken, User, UserCredentials,
-        UserRegistrationCredentials,
-    },
+    authentication::errors::{RegistrationConfirmationError, RegistrationError},
+    authentication::validation::{RegistrationTokenQueryExtractor, UserRegistrationCredentials},
+    database::models::{NewUser, RegistrationToken, User},
     email::RegistrationConfirmation,
-    errors::{LoginError, RegistrationConfirmationError, RegistrationError},
     state::AppState,
     utils::generate_registration_token,
-    BASE_URL, KEYS,
+    BASE_URL,
 };
 use axum::{
     extract::{Query, State},
-    response::{Html, IntoResponse, Json, Response},
+    response::{Html, Json},
 };
-use bcrypt::{hash, verify, DEFAULT_COST};
+use bcrypt::{hash, DEFAULT_COST};
 use diesel::result::Error as DieselError;
 use diesel::{prelude::*, result::DatabaseErrorKind};
 use diesel_async::{AsyncConnection, RunQueryDsl};
-use jsonwebtoken::{encode, Header};
 use scoped_futures::ScopedFutureExt;
 use serde_json::{json, Value};
 
-pub async fn root_handler() -> Response {
-    Html(include_str!("../../blackrose-website-frontend/index.html")).into_response()
-}
-
-pub async fn login_handler(
-    State(app_state): State<AppState>,
-    Json(credentials): Json<UserCredentials>,
-) -> Result<Json<Value>, LoginError> {
-    // Checks if credentials are present
-    if credentials.email.is_empty() || credentials.password.is_empty() {
-        return Err(LoginError::MissingCredentials);
-    }
-    // Find the user associated with the email in the database
-    use crate::database::schema::users::dsl::*;
-    let mut conn = app_state.db.lock().await;
-    let found_user: User = users
-        .filter(email.eq(credentials.email.clone()))
-        .first::<User>(&mut *conn)
-        .await
-        .map_err(|why| match why {
-            DieselError::NotFound => LoginError::NotFound,
-            _ => LoginError::InternalError,
-        })?;
-    // Release the lock
-    drop(conn);
-    // Check if the user has confirmed their registration
-    if !found_user.registration_confirmed {
-        return Err(LoginError::UnconfirmedUserRegistration);
-    }
-    // Check if the password is correct
-    if verify(credentials.password, &found_user.password_hash)
-        .map_err(|_| LoginError::InternalError)?
-    {
-        // Make the claim
-        let claims = Claims {
-            email: credentials.email,
-            exp: expire_in_five_hours(),
-        };
-
-        // Make the token
-
-        let token = encode(&Header::default(), &claims, &KEYS.encoding)
-            .map_err(|_| LoginError::TokenCreation)?;
-        // Return token
-        Ok(Json(json!({"access_token": token, "type": "Bearer"})))
-    } else {
-        // Wrong password for the found_user
-        Err(LoginError::NotFound)
-    }
-}
-
 pub async fn registration_handler(
     State(mut app_state): State<AppState>,
-    Json(credentials): Json<UserRegistrationCredentials>,
+    credentials: UserRegistrationCredentials,
 ) -> Result<Json<Value>, RegistrationError> {
     // Check for missing credentials
     if credentials.email.is_empty()
@@ -83,7 +28,7 @@ pub async fn registration_handler(
         || credentials.username.is_empty()
         || credentials.display_name.is_empty()
     {
-        return Err(RegistrationError::MissingCredentials);
+        return Err(RegistrationError::InvalidCredentials);
     }
     // Hash the password
     let hashed_password =
@@ -151,7 +96,7 @@ pub async fn registration_handler(
 
 pub async fn registration_confirmation_handler<'a>(
     State(app_state): State<AppState>,
-    query: Query<RegistrationQueryExtractor>,
+    query: Query<RegistrationTokenQueryExtractor>,
 ) -> Result<Html<String>, RegistrationConfirmationError> {
     // First join users and registration_tokens together, updating the rows where we find our registration token. Then, we delete the registration_token from the registration_tokens table. Do this in a single transaction to be ACID compliant
     use crate::database::schema::registration_tokens::dsl::*;
