@@ -1,6 +1,7 @@
 # Features to implement:
-## Registration/Login REST endpoints:
-1. Input Validation for these REST endpoints using the `validator` crate
-See [this axum example](https://github.com/tokio-rs/axum/blob/main/examples/validator/src/main.rs) for direction.
-    1. Define `FromRequest` implementation on `UserCredentials` and `UserRegistrationCredentials`. This would use the `DbInterface` state to do the checking of the things done in `registration_handler` and `login_handler`. In addition, the `Validate` trait would be derived on the aforementioned structs.
-    2. Refactor `registration_handler` and `login_handler` to use `UserCredentials(credentials)` and `UserRegistrationCredentials(credentials)`. The handlers would then just create the corresponding `Responses`; no checks required.
+## Blog API
+1. Unprotected GET endpoint that maps to the BlogPost model
+2. Unprotected GET endpoint that maps to the Comment model
+3. User-protected POST endpoint that maps to the Comment model
+## Admin API
+1. Admin-protected GET and POST endpoints that map to our BlogPost, Comment, and User models.
