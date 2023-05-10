@@ -20,7 +20,7 @@ use serde_json::{json, Value};
 
 pub async fn registration_handler(
     State(mut app_state): State<AppState>,
-    Json(credentials): Json<UserRegistrationCredentials>,
+    credentials: UserRegistrationCredentials,
 ) -> Result<Json<Value>, RegistrationError> {
     // Check for missing credentials
     if credentials.email.is_empty()
@@ -28,7 +28,7 @@ pub async fn registration_handler(
         || credentials.username.is_empty()
         || credentials.display_name.is_empty()
     {
-        return Err(RegistrationError::MissingCredentials);
+        return Err(RegistrationError::InvalidCredentials);
     }
     // Hash the password
     let hashed_password =

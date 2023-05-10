@@ -3,6 +3,7 @@ use axum::response::IntoResponse;
 use axum::Json;
 use serde_json::json;
 use thiserror::Error;
+use validator::ValidationError;
 
 use crate::email::RegistrationConfirmation;
 
@@ -46,16 +47,12 @@ impl IntoResponse for LoginError {
 
 #[derive(Error, Debug)]
 pub enum RegistrationError {
-    #[error("Missing Credentials")]
-    MissingCredentials,
+    #[error("Invalid Credentials")]
+    InvalidCredentials,
     #[error("Internal error")]
     InternalError,
     #[error("User already present.")]
     UserAlreadyTaken,
-    #[error("Invalid token")]
-    InvalidToken,
-    #[error("Failed to create token")]
-    TokenCreation,
 }
 
 impl IntoResponse for RegistrationError {
@@ -65,10 +62,11 @@ impl IntoResponse for RegistrationError {
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "An internal server error occured.",
             ),
-            Self::MissingCredentials => (StatusCode::BAD_REQUEST, "Missing credentials."),
+            Self::InvalidCredentials => (
+                StatusCode::BAD_REQUEST,
+                "Missing, invalid, or inadequate credentials.",
+            ),
             Self::UserAlreadyTaken => (StatusCode::CONFLICT, "User already present."),
-            Self::InvalidToken => (StatusCode::BAD_REQUEST, "Invalid token."),
-            Self::TokenCreation => (StatusCode::INTERNAL_SERVER_ERROR, "Failed to create token."),
         };
         (status, Json(json!({ "error": err_msg }))).into_response()
     }
