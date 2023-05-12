@@ -1,69 +1,95 @@
-use crate::database::schema::{blog_posts, comments, users};
+use crate::database::schema::{blog_posts, comments, registration_tokens, users};
+use chrono::{DateTime, Utc};
 use diesel::data_types::PgTimestamp;
 use diesel::prelude::*;
+use serde::Deserialize;
 
-#[derive(Queryable, Selectable)]
+#[derive(Queryable, Identifiable, Associations)]
+#[diesel(belongs_to(User, foreign_key = author_id))]
 #[diesel(table_name = blog_posts)]
-struct BlogPost {
-    id: i32,
-    title: String,
-    content: String,
-    author_id: i32,
-    created_at: PgTimestamp,
-    updated_at: PgTimestamp,
-    removed: bool,
+#[diesel(primary_key(blog_post_id))]
+pub struct BlogPost {
+    #[diesel(column_name = blog_post_id)]
+    pub id: i32,
+    pub title: String,
+    pub content: String,
+    pub author_id: i32,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
+    pub removed: bool,
+}
+
+#[derive(Insertable, Associations)]
+#[diesel(belongs_to(User, foreign_key = author_id))]
+#[diesel(table_name = blog_posts)]
+pub struct NewBlogPost {
+    pub title: String,
+    pub content: String,
+    pub author_id: i32,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: Option<DateTime<Utc>>,
+    pub removed: bool,
+}
+
+#[derive(Queryable, AsChangeset, Clone, Identifiable, Selectable)]
+#[diesel(table_name = users)]
+#[diesel(primary_key(user_id))]
+pub struct User {
+    #[diesel(column_name = user_id)]
+    pub id: i32,
+    pub username: String,
+    pub display_name: String,
+    pub email: String,
+    pub password_hash: String,
+    pub admin: bool,
+    pub registration_confirmed: bool,
 }
 
 #[derive(Insertable)]
-#[diesel(table_name = blog_posts)]
-struct NewBlogPost {
-    title: String,
-    content: String,
-    author_id: i32,
-    created_at: PgTimestamp,
-    updated_at: PgTimestamp,
-    removed: bool,
-}
-
-#[derive(Queryable, AsChangeset)]
 #[diesel(table_name = users)]
-struct User {
-    id: i32,
-    username: String,
-    display_name: String,
-    email: String,
-    password_hash: String,
-    admin: bool,
+pub struct NewUser {
+    pub username: String,
+    pub display_name: String,
+    pub email: String,
+    pub password_hash: String,
+    pub admin: bool,
+    pub registration_confirmed: bool,
 }
 
-#[derive(Insertable)]
-#[diesel(table_name = users)]
-struct NewUser {
-    username: String,
-    display_name: String,
-    email: String,
-    password_hash: String,
-    admin: bool,
+#[derive(Queryable, Identifiable, Insertable, Associations, Selectable)]
+#[diesel(primary_key(user_id))]
+#[diesel(belongs_to(User))]
+pub struct RegistrationToken {
+    pub user_id: i32,
+    pub registration_token: String,
 }
 
-#[derive(Queryable)]
+#[derive(Queryable, Identifiable, Associations)]
+#[diesel(belongs_to(User, foreign_key = author_id))]
+#[diesel(belongs_to(BlogPost, foreign_key = post_id))]
+#[diesel(primary_key(comment_id))]
 #[diesel(table_name = comments)]
 struct Comment {
+    #[diesel(column_name = comment_id)]
     id: i32,
     content: String,
     author_id: i32,
     post_id: i32,
-    created_at: PgTimestamp,
-    updated_at: PgTimestamp,
+    created_at: DateTime<Utc>,
+    updated_at: Option<DateTime<Utc>>,
     removed: bool,
 }
 
-#[derive(Insertable)]
+// Don't have removed field because you shouldn't be able to remove a comment as soon as you add it
+
+#[derive(Insertable, Associations)]
+#[diesel(belongs_to(User, foreign_key = author_id))]
+#[diesel(belongs_to(BlogPost, foreign_key = post_id))]
 #[diesel(table_name = comments)]
 struct NewComment {
     content: String,
     author_id: i32,
     post_id: i32,
-    created_at: PgTimestamp,
-    updated_at: PgTimestamp,
+    created_at: DateTime<Utc>,
+    updated_at: Option<DateTime<Utc>>,
 }
