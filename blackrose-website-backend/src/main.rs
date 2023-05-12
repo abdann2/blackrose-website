@@ -51,7 +51,7 @@ async fn main() {
         .route("/register", post(registration_handler))
         .route("/register/confirm", get(registration_confirmation_handler))
         .with_state(db_int);
-    axum::Server::bind(&"127.0.0.1:4000".parse().unwrap())
+    axum::Server::bind(&BASE_URL.parse().unwrap())
         .serve(router.into_make_service())
         .await
         .unwrap();

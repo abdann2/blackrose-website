@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  blackrose-website-db:
+    image: postgres:latest
+    container_name: blackrose-website-db
+    restart: always
+    environment:
+      - POSTGRES_USER=
+      - POSTGRES_PASSWORD=
+    ports:
+      - 8002:5432
+    volumes:
+      - ./root:/var/lib/postgresql/data
+    command: [ "postgres", "-c", "log_statement=all" ]

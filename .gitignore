@@ -1,4 +1,4 @@
 blackrose-website-backend/target/*
 blackrose-website-backend/Cargo.lock
-blackrose-website-backend/db/*
+blackrose-website-backend/db/root/*
 blackrose-website-backend/.env
